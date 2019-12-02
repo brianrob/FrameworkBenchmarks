@@ -22,22 +22,24 @@ RUN apt-get update && \
 
 # Download and install the .NET Core SDK.
 WORKDIR /dotnet
-RUN curl -OL https://download.visualstudio.microsoft.com/download/pr/c624c5d6-0e9c-4dd9-9506-6b197ef44dc8/ad61b332f3abcc7dec3a49434e4766e1/dotnet-sdk-3.0.100-preview7-012821-linux-x64.tar.gz && \
-    tar -xzvf dotnet-sdk-3.0.100-preview7-012821-linux-x64.tar.gz
+RUN curl -OL https://download.visualstudio.microsoft.com/download/pr/4f51cfd8-311d-43fe-a887-c80b40358cfd/440d10dc2091b8d0f1a12b7124034e49/dotnet-sdk-3.0.101-linux-x64.tar.gz && \
+    tar -xzvf dotnet-sdk-3.0.101-linux-x64.tar.gz
 ENV PATH=${PATH}:/dotnet
 
 # Clone the test repo.
 WORKDIR /src
-RUN git clone https://github.com/aspnet/aspnetcore
+RUN git clone https://github.com/brianrob/aspnetcore && \
+    cd aspnetcore && \
+    git checkout 3.0.1
 
 # Build the app.
 ENV BenchmarksTargetFramework netcoreapp3.0
-ENV MicrosoftAspNetCoreAppPackageVersion 3.0.0-preview7.19365.7
-ENV MicrosoftNETCoreAppPackageVersion 3.0.0-preview7-27912-14
+ENV MicrosoftAspNetCoreAppPackageVersion 3.0.1
+ENV MicrosoftNETCoreAppPackageVersion 3.0.1
 WORKDIR /src/aspnetcore/src/Servers/Kestrel/perf/PlatformBenchmarks
 RUN dotnet publish -c Release -f netcoreapp3.0 --self-contained -r linux-x64
 
 # Run the test.
 WORKDIR /src/aspnetcore/src/Servers/Kestrel/perf/PlatformBenchmarks/bin/Release/netcoreapp3.0/linux-x64/publish
 ENV ASPNETCORE_URLS http://+:8080
-ENTRYPOINT ["./PlatformBenchmarks"]
+CMD ["./PlatformBenchmarks"]
